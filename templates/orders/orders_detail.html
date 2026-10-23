@@ -1,0 +1,105 @@
+
+{% extends 'base.html' %}
+{% load order_extras %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 800px;">
+        <div class="card-header bg-dark text-white">
+            <h2 class="mb-0">Order #{{ order.pk }}</h2>
+        </div>
+
+        <div class="card-body p-4">
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <h5>Table</h5>
+                    <p>
+                        <a href="{% url 'table_detail' order.table.pk %}">
+                            Table {{ order.table.number }}
+                        </a>
+                    </p>
+                </div>
+
+                <div class="col-md-6">
+                    <h5>Status</h5>
+
+                    {% if order.status == 'pending' %}
+                        <span class="badge bg-warning text-dark">
+                            {{ order.get_status_display }}
+                        </span>
+                    {% elif order.status == 'preparing' %}
+                        <span class="badge bg-info text-dark">
+                            {{ order.get_status_display }}
+                        </span>
+                    {% elif order.status == 'ready' %}
+                        <span class="badge bg-success">
+                            {{ order.get_status_display }}
+                        </span>
+                    {% else %}
+                        <span class="badge bg-secondary">
+                            {{ order.get_status_display }}
+                        </span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <h5>Ordered Dishes</h5>
+
+            <ul class="list-group mb-3">
+                {% for dish in order.dishes.all %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span>
+                            {{ dish.name }}
+                            ({{ dish.get_category_display }})
+                        </span>
+                        <strong>
+                            {{ dish.price|floatformat:2 }} €
+                        </strong>
+                    </li>
+                {% empty %}
+                    <li class="list-group-item text-muted">
+                        No dishes selected.
+                    </li>
+                {% endfor %}
+            </ul>
+
+            <div class="d-flex justify-content-between align-items-center
+                        bg-light border rounded p-3 mb-4">
+                <h5 class="mb-0">Total Price:</h5>
+                <h4 class="mb-0 text-success">
+                    {{ order|order_total|floatformat:2 }} €
+                </h4>
+            </div>
+
+            <h5>Additional Notes</h5>
+            <p class="text-muted">
+                {{ order.notes|default:"No additional notes." }}
+            </p>
+
+            <hr>
+
+            <p>
+                <strong>Created At:</strong>
+                {{ order.created_at|date:"d M Y, H:i" }}
+            </p>
+
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <a href="{% url 'order_update' order.pk %}"
+                   class="btn btn-warning">
+                    Edit Order
+                </a>
+
+                <a href="{% url 'order_delete' order.pk %}"
+                   class="btn btn-danger">
+                    Delete Order
+                </a>
+
+                <a href="{% url 'orders_list' %}"
+                   class="btn btn-secondary">
+                    Back to Orders
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

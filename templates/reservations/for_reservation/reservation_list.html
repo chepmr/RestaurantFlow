@@ -1,0 +1,147 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Reservations | RestaurantFlow{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="fw-bold mb-2">Restaurant Reservations</h1>
+        <p class="text-muted mb-0">View and manage all restaurant reservations.</p>
+    </div>
+
+    <a href="{% url 'reservation_create' %}" class="btn btn-warning fw-semibold">
+        + New Reservation
+    </a>
+</div>
+
+<div class="card border-0 shadow-sm rounded-4">
+    <div class="card-body p-4">
+
+        {% if reservations %}
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Customer</th>
+                            <th>Date</th>
+                            <th>Time</th>
+                            <th>Guests</th>
+                            <th>Tables</th>
+                            <th>Status</th>
+                            <th class="text-end">Actions</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for reservation in reservations %}
+                            <tr>
+                                <td class="fw-semibold">
+                                    {{ reservation.customer_name }}
+                                </td>
+
+                                <td>
+                                    {{ reservation.date|date:"d M Y" }}
+                                </td>
+
+                                <td>
+                                    {{ reservation.time|time:"H:i" }}
+                                </td>
+
+                                <td>
+                                    {{ reservation.guests_count }}
+                                </td>
+
+                                <td>
+                                    {% for table in reservation.tables.all %}
+                                        <span class="badge bg-light text-dark border">
+                                            Table {{ table.number }}
+                                        </span>
+                                    {% empty %}
+                                        <span class="text-muted">No tables</span>
+                                    {% endfor %}
+                                </td>
+
+                                <td>
+                                    {% if reservation.status == 'confirmed' %}
+                                        <span class="badge bg-success">Confirmed</span>
+                                    {% elif reservation.status == 'cancelled' %}
+                                        <span class="badge bg-danger">Cancelled</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Completed</span>
+                                    {% endif %}
+                                </td>
+
+                                <td class="text-end">
+                                    <div class="d-flex justify-content-end gap-2">
+                                        <a href="{% url 'reservation_detail' reservation.pk %}"
+                                           class="btn btn-sm btn-outline-primary">
+                                            Details
+                                        </a>
+
+                                        <a href="{% url 'reservation_update' reservation.pk %}"
+                                           class="btn btn-sm btn-outline-warning">
+                                            Edit
+                                        </a>
+
+                                        <a href="{% url 'reservation_delete' reservation.pk %}"
+                                           class="btn btn-sm btn-outline-danger">
+                                            Delete
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+        {% else %}
+            <div class="text-center py-5">
+                <h4 class="fw-semibold">No Reservations Yet</h4>
+
+                <p class="text-muted">
+                    There are no reservations in the restaurant.
+                </p>
+
+                <a href="{% url 'reservation_create' %}" class="btn btn-warning">
+                    Create Your First Reservation
+                </a>
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+
+{% if is_paginated %}
+    <nav class="mt-4" aria-label="Reservation pagination">
+        <ul class="pagination justify-content-center">
+
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+            {% endif %}
+
+            {% for num in paginator.page_range %}
+                <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                    <a class="page-link" href="?page={{ num }}">
+                        {{ num }}
+                    </a>
+                </li>
+            {% endfor %}
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="?page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+{% endif %}
+{% endblock %}

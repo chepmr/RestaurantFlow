@@ -1,0 +1,247 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!-- Hero Section -->
+<section class="bg-dark text-white py-5">
+    <div class="container text-center py-5">
+        <h1 class="display-4 fw-bold mb-3">
+            Welcome to RestaurantFlow
+        </h1>
+
+        <p class="lead text-light mb-4">
+            Explore our menu, reserve a table, and order
+            your favorite dishes directly from your table.
+        </p>
+
+        <div class="d-flex justify-content-center flex-wrap gap-3">
+            <a href="{% url 'dish_list' %}"
+               class="btn btn-warning btn-lg">
+                Explore Menu
+            </a>
+
+            <a href="{% url 'reservation_create' %}"
+               class="btn btn-outline-light btn-lg">
+                Make Reservation
+            </a>
+
+            <a href="{% url 'order_create' %}"
+               class="btn btn-success btn-lg">
+                Order Now
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- Main Features -->
+<section class="container py-5">
+    <div class="text-center mb-5">
+        <h2 class="fw-bold">Restaurant Management</h2>
+        <p class="text-muted">
+            Everything you need for a better dining experience.
+        </p>
+    </div>
+
+    <div class="row g-4">
+
+        <!-- Tables -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <h3 class="h4 mb-3">Tables</h3>
+
+                    <p class="text-muted">
+                        Explore restaurant tables,
+                        their capacity and location.
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'table_list' %}"
+                           class="btn btn-outline-primary">
+                            View Tables
+                        </a>
+
+                        <a href="{% url 'table_create' %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            Add Table
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservations -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <h3 class="h4 mb-3">Reservations</h3>
+
+                    <p class="text-muted">
+                        Reserve a table for your next visit
+                        and manage existing reservations.
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'reservation_list' %}"
+                           class="btn btn-outline-primary">
+                            View Reservations
+                        </a>
+
+                        <a href="{% url 'reservation_create' %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            New Reservation
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <h3 class="h4 mb-3">Menu</h3>
+
+                    <p class="text-muted">
+                        Discover our dishes, browse categories
+                        and explore available meals.
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'dish_list' %}"
+                           class="btn btn-outline-primary">
+                            View Menu
+                        </a>
+
+                        <a href="{% url 'dish_create' %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            Add Dish
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders -->
+        <div class="col-md-6 col-lg-3">
+            <div class="card h-100 shadow-sm border-0">
+                <div class="card-body text-center p-4">
+                    <h3 class="h4 mb-3">Orders</h3>
+
+                    <p class="text-muted">
+                        Order food directly from your table
+                        and track the status of your orders.
+                    </p>
+
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'orders_list' %}"
+                           class="btn btn-outline-primary">
+                            View Orders
+                        </a>
+
+                        <a href="{% url 'order_create' %}"
+                           class="btn btn-sm btn-outline-secondary">
+                            Create Order
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</section>
+
+
+<!-- Available Tables -->
+<section class="bg-light py-5">
+    <div class="container">
+        <div class="text-center mb-4">
+            <h2 class="fw-bold">Our Tables</h2>
+            <p class="text-muted">
+                Explore tables currently in service.
+            </p>
+        </div>
+
+        {% if tables %}
+            <div class="row g-4">
+                {% for table in tables %}
+                    <div class="col-md-6 col-lg-4">
+                        <div class="card h-100 shadow-sm">
+                            <div class="card-body p-4">
+                                <h4 class="card-title">
+                                    Table {{ table.number }}
+                                </h4>
+
+                                <p class="mb-2">
+                                    <strong>Capacity:</strong>
+                                    {{ table.capacity }} guests
+                                </p>
+
+                                <p class="mb-3">
+                                    <strong>Location:</strong>
+                                    {{ table.get_location_display }}
+                                </p>
+
+                                <span class="badge bg-success mb-3">
+                                    In Service
+                                </span>
+
+                                <div class="d-grid">
+                                    <a href="{% url 'table_detail' table.pk %}"
+                                       class="btn btn-outline-primary">
+                                        View Details
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="alert alert-info text-center">
+                No tables are currently in service.
+            </div>
+        {% endif %}
+
+        <div class="text-center mt-4">
+            <a href="{% url 'table_list' %}"
+               class="btn btn-primary">
+                View All Tables
+            </a>
+        </div>
+    </div>
+</section>
+
+
+<!-- Order Call To Action -->
+<section class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 text-center">
+            <h2 class="fw-bold mb-3">
+                Ready to Order?
+            </h2>
+
+            <p class="lead text-muted mb-4">
+                Choose your table, select your favorite dishes,
+                and place your order without waiting.
+                No reservation is required.
+            </p>
+
+            <div class="d-flex justify-content-center flex-wrap gap-3">
+                <a href="{% url 'order_create' %}"
+                   class="btn btn-success btn-lg">
+                    Create an Order
+                </a>
+
+                <a href="{% url 'orders_list' %}"
+                   class="btn btn-outline-dark btn-lg">
+                    Track Orders
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

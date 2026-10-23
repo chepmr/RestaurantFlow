@@ -1,0 +1,122 @@
+
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Edit Reservation{% else %}New Reservation{% endif %} | RestaurantFlow
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="mb-4">
+            <h1 class="fw-bold">
+                {% if object %}
+                    Edit Reservation
+                {% else %}
+                    Make a Reservation
+                {% endif %}
+            </h1>
+
+            <p class="text-muted">
+                {% if object %}
+                    Update your reservation details below.
+                {% else %}
+                    Choose your preferred date, time and tables to make a reservation.
+                {% endif %}
+            </p>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-dark text-white p-4 rounded-top-4">
+                <h4 class="mb-0">Reservation Information</h4>
+            </div>
+
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {% for error in form.non_field_errors %}
+                                <p class="mb-1">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+
+                    {% for field in form %}
+                        <div class="mb-4">
+
+                            <label for="{{ field.id_for_label }}" class="form-label fw-semibold">
+                                {{ field.label }}
+                                {% if field.field.required %}
+                                    <span class="text-danger">*</span>
+                                {% endif %}
+                            </label>
+
+                            {% if field.name == 'tables' %}
+                                <div class="border rounded-3 p-3 bg-light">
+                                    {{ field }}
+
+                                    <p class="text-muted small mt-3 mb-0">
+                                        You can select multiple tables if needed.
+                                    </p>
+                                </div>
+                            {% else %}
+                                {{ field }}
+                            {% endif %}
+
+                            {% if field.help_text %}
+                                <div class="form-text">
+                                    {{ field.help_text }}
+                                </div>
+                            {% endif %}
+
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">
+                                    {{ error }}
+                                </div>
+                            {% endfor %}
+
+                        </div>
+                    {% endfor %}
+
+                    <div class="alert alert-info rounded-3">
+                        <h6 class="fw-bold mb-2">Reservation Guidelines</h6>
+
+                        <ul class="mb-0 small">
+                            <li>Each reservation lasts 2 hours.</li>
+                            <li>Reservations must be made for a future date and time.</li>
+                            <li>The selected tables must have enough capacity for all guests.</li>
+                            <li>Only tables currently in service can be reserved.</li>
+                            <li>Tables already reserved for the selected period cannot be booked again.</li>
+                        </ul>
+                    </div>
+
+                    <hr class="my-4">
+
+                    <div class="d-flex justify-content-between align-items-center gap-3">
+                        <a href="{% url 'reservation_list' %}" class="btn btn-outline-secondary">
+                            Cancel
+                        </a>
+
+                        <button type="submit" class="btn btn-warning fw-semibold px-4">
+                            {% if object %}
+                                Save Changes
+                            {% else %}
+                                Confirm Reservation
+                            {% endif %}
+                        </button>
+                    </div>
+
+                </form>
+            </div>
+        </div>
+
+        <p class="text-center text-muted small mt-4">
+            Please make sure all reservation details are correct before submitting.
+        </p>
+
+    </div>
+</div>
+{% endblock %}

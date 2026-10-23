@@ -1,0 +1,136 @@
+
+{% extends 'base.html' %}
+{% load l10n %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="card shadow-sm mx-auto" style="max-width: 700px;">
+
+        <div class="card-header bg-dark text-white">
+            {% if form.instance.pk %}
+                <h2 class="mb-0">Edit Order #{{ form.instance.pk }}</h2>
+            {% else %}
+                <h2 class="mb-0">Create Order</h2>
+            {% endif %}
+        </div>
+
+        <div class="card-body p-4">
+            <form method="post">
+                {% csrf_token %}
+
+                {% if form.non_field_errors %}
+                    <div class="alert alert-danger">
+                        {% for error in form.non_field_errors %}
+                            <p class="mb-0">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+
+                {% for field in form %}
+                    <div class="mb-4">
+                        <label for="{{ field.id_for_label }}"
+                               class="form-label fw-semibold">
+                            {{ field.label }}
+                        </label>
+
+                        {% if field.name == 'dishes' %}
+                            <div class="border rounded p-3">
+                                {{ field }}
+                            </div>
+
+                            <div class="bg-light border rounded p-3 mt-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">Total Price:</h5>
+                                    <h4 class="mb-0 text-success"
+                                        id="total-price">
+                                        0.00 €
+                                    </h4>
+                                </div>
+                            </div>
+
+                        {% else %}
+                            {{ field }}
+                        {% endif %}
+
+                        {% if field.help_text %}
+                            <div class="form-text">
+                                {{ field.help_text }}
+                            </div>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <div class="text-danger small mt-1">
+                                {{ error }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <div id="dish-prices" hidden>
+                    {% for dish in form.fields.dishes.queryset %}
+                        <span
+                            data-dish-id="{{ dish.pk }}"
+                            data-price="{{ dish.price|unlocalize }}">
+                        </span>
+                    {% endfor %}
+                </div>
+
+                <div class="d-flex gap-2 mt-4">
+                    <button type="submit" class="btn btn-success">
+                        {% if form.instance.pk %}
+                            Save Changes
+                        {% else %}
+                            Create Order
+                        {% endif %}
+                    </button>
+
+                    <a href="{% url 'orders_list' %}"
+                       class="btn btn-secondary">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const totalPriceElement = document.getElementById('total-price');
+        const dishCheckboxes = document.querySelectorAll(
+            'input[name="dishes"]'
+        );
+
+        const dishPrices = {};
+
+        document.querySelectorAll('#dish-prices [data-dish-id]').forEach(
+            function (dish) {
+                dishPrices[dish.dataset.dishId] = Number(
+                    dish.dataset.price
+                );
+            }
+        );
+
+        function updateTotalPrice() {
+            let totalCents = 0;
+
+            dishCheckboxes.forEach(function (checkbox) {
+                if (checkbox.checked) {
+                    const price = dishPrices[checkbox.value] || 0;
+                    totalCents += Math.round(price * 100);
+                }
+            });
+
+            totalPriceElement.textContent = (
+                totalCents / 100
+            ).toFixed(2) + ' €';
+        }
+
+        dishCheckboxes.forEach(function (checkbox) {
+            checkbox.addEventListener('change', updateTotalPrice);
+        });
+
+        updateTotalPrice();
+    });
+</script>
+{% endblock %}

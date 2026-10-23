@@ -1,0 +1,161 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="fw-bold">Restaurant Menu</h1>
+            <p class="text-muted">Browse and manage our dishes.</p>
+        </div>
+
+        <a href="{% url 'dish_create' %}" class="btn btn-success">
+            + Add Dish
+        </a>
+    </div>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <form method="get" action="{% url 'dish_list' %}">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-8">
+                        <label for="category" class="form-label">
+                            Filter by Category
+                        </label>
+
+                        <select name="category" id="category" class="form-select">
+                            <option value="">All Categories</option>
+                            <option value="starter"
+                                {% if request.GET.category == 'starter' %}selected{% endif %}>
+                                Starters
+                            </option>
+                            <option value="main_dish"
+                                {% if request.GET.category == 'main_dish' %}selected{% endif %}>
+                                Main Dishes
+                            </option>
+                            <option value="dessert"
+                                {% if request.GET.category == 'dessert' %}selected{% endif %}>
+                                Desserts
+                            </option>
+                            <option value="drink"
+                                {% if request.GET.category == 'drink' %}selected{% endif %}>
+                                Drinks
+                            </option>
+                        </select>
+                    </div>
+
+                    <div class="col-md-4 d-flex gap-2">
+                        <button type="submit" class="btn btn-primary flex-fill">
+                            Filter
+                        </button>
+                        <a href="{% url 'dish_list' %}"
+                           class="btn btn-outline-secondary">
+                            Reset
+                        </a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for dish in dishes %}
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+
+                        <div class="d-flex justify-content-between mb-3">
+                            <span class="badge bg-secondary">
+                                {{ dish.get_category_display }}
+                            </span>
+
+                            {% if dish.is_available %}
+                                <span class="badge bg-success">
+                                    Available
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger">
+                                    Unavailable
+                                </span>
+                            {% endif %}
+                        </div>
+
+                        <h5 class="card-title fw-bold">
+                            {{ dish.name }}
+                        </h5>
+
+                        <p class="card-text text-muted">
+                            {{ dish.description|default:"No description available."|truncatewords:20 }}
+                        </p>
+
+                        <h5 class="text-success mt-auto mb-3">
+                            {{ dish.price|floatformat:2 }} €
+                        </h5>
+
+                        <div class="d-flex gap-2">
+                            <a href="{% url 'dish_detail' dish.pk %}"
+                               class="btn btn-outline-primary btn-sm flex-fill">
+                                Details
+                            </a>
+
+                            <a href="{% url 'dish_update' dish.pk %}"
+                               class="btn btn-outline-warning btn-sm">
+                                Edit
+                            </a>
+
+                            <a href="{% url 'dish_delete' dish.pk %}"
+                               class="btn btn-outline-danger btn-sm">
+                                Delete
+                            </a>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center">
+                    No dishes found.
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+        <nav class="mt-5" aria-label="Dish pagination">
+            <ul class="pagination justify-content-center">
+
+                {% if page_obj.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?category={{ request.GET.category|urlencode }}&page={{ page_obj.previous_page_number }}">
+                            Previous
+                        </a>
+                    </li>
+                {% endif %}
+
+                {% for num in paginator.page_range %}
+                    <li class="page-item {% if page_obj.number == num %}active{% endif %}">
+                        <a class="page-link"
+                           href="?category={{ request.GET.category|urlencode }}&page={{ num }}">
+                            {{ num }}
+                        </a>
+                    </li>
+                {% endfor %}
+
+                {% if page_obj.has_next %}
+                    <li class="page-item">
+                        <a class="page-link"
+                           href="?category={{ request.GET.category|urlencode }}&page={{ page_obj.next_page_number }}">
+                            Next
+                        </a>
+                    </li>
+                {% endif %}
+
+            </ul>
+        </nav>
+    {% endif %}
+
+</div>
+{% endblock %}

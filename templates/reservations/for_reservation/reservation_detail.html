@@ -1,0 +1,137 @@
+
+{% extends 'base.html' %}
+
+{% block title %}Reservation Details | RestaurantFlow{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h1 class="fw-bold mb-2">Reservation Details</h1>
+                <p class="text-muted mb-0">Reservation #{{ reservation.pk }}</p>
+            </div>
+
+            <a href="{% url 'reservation_list' %}" class="btn btn-outline-secondary">
+                Back to Reservations
+            </a>
+        </div>
+
+        <div class="card border-0 shadow-sm rounded-4">
+            <div class="card-header bg-dark text-white p-4 rounded-top-4">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h4 class="mb-0">Reservation Information</h4>
+
+                    {% if reservation.status == 'confirmed' %}
+                        <span class="badge bg-success">Confirmed</span>
+                    {% elif reservation.status == 'cancelled' %}
+                        <span class="badge bg-danger">Cancelled</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Completed</span>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="card-body p-4">
+
+                <h5 class="fw-bold mb-3">Customer Information</h5>
+
+                <div class="row mb-4">
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted">Customer Name</h6>
+                        <p class="fw-semibold">{{ reservation.customer_name }}</p>
+                    </div>
+
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted">Phone Number</h6>
+                        <p class="fw-semibold">{{ reservation.phone_number }}</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h5 class="fw-bold my-4">Reservation Information</h5>
+
+                <div class="row">
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted">Reservation Date</h6>
+                        <p class="fw-semibold">{{ reservation.date|date:"d M Y" }}</p>
+                    </div>
+
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted">Starting Time</h6>
+                        <p class="fw-semibold">{{ reservation.time|time:"H:i" }}</p>
+                    </div>
+
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted">Number of Guests</h6>
+                        <p class="fw-semibold">{{ reservation.guests_count }}</p>
+                    </div>
+
+                    <div class="col-sm-6 mb-3">
+                        <h6 class="text-muted">Reservation Duration</h6>
+                        <p class="fw-semibold">2 Hours</p>
+                    </div>
+                </div>
+
+                <hr>
+
+                <h5 class="fw-bold my-4">Reserved Tables</h5>
+
+                <div class="row">
+                    {% for table in reservation.tables.all %}
+                        <div class="col-md-6 mb-3">
+                            <div class="border rounded-3 p-3 h-100">
+                                <h6 class="fw-bold">Table {{ table.number }}</h6>
+
+                                <p class="text-muted small mb-1">
+                                    Capacity: {{ table.capacity }} guests
+                                </p>
+
+                                <p class="text-muted small mb-3">
+                                    Location: {{ table.get_location_display }}
+                                </p>
+
+                                <a href="{% url 'table_detail' table.pk %}"
+                                   class="btn btn-sm btn-outline-dark">
+                                    View Table
+                                </a>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <p class="text-muted">No tables assigned to this reservation.</p>
+                        </div>
+                    {% endfor %}
+                </div>
+
+                <hr>
+
+                <p class="text-muted small">
+                    Created on {{ reservation.created_at|date:"d M Y, H:i" }}
+                </p>
+
+                <div class="d-flex flex-wrap gap-2 mt-4">
+                    <a href="{% url 'reservation_update' reservation.pk %}"
+                       class="btn btn-warning">
+                        Edit Reservation
+                    </a>
+
+                    <a href="{% url 'reservation_delete' reservation.pk %}"
+                       class="btn btn-outline-danger">
+                        Delete Reservation
+                    </a>
+
+                    <a href="{% url 'reservation_list' %}"
+                       class="btn btn-outline-dark">
+                        All Reservations
+                    </a>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

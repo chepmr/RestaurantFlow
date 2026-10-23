@@ -1,0 +1,77 @@
+
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <div class="card shadow-sm border-0">
+                <div class="card-body p-4 p-md-5">
+
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <span class="badge bg-secondary fs-6">
+                            {{ dish.get_category_display }}
+                        </span>
+
+                        {% if dish.is_available %}
+                            <span class="badge bg-success fs-6">
+                                Available
+                            </span>
+                        {% else %}
+                            <span class="badge bg-danger fs-6">
+                                Unavailable
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <h1 class="fw-bold mb-4">
+                        {{ dish.name }}
+                    </h1>
+
+                    <h5 class="text-muted mb-3">
+                        Description
+                    </h5>
+
+                    <p class="card-text mb-4">
+                        {{ dish.description|default:"No description available."|linebreaks }}
+                    </p>
+
+                    <hr>
+
+                    <div class="d-flex justify-content-between align-items-center my-4">
+                        <h5 class="mb-0">Price</h5>
+
+                        <h3 class="text-success fw-bold mb-0">
+                            {{ dish.price|floatformat:2 }} €
+                        </h3>
+                    </div>
+
+                    <hr>
+
+                    <div class="d-flex flex-wrap gap-2 mt-4">
+                        <a href="{% url 'dish_list' %}"
+                           class="btn btn-outline-secondary">
+                            Back to Menu
+                        </a>
+
+                        <a href="{% url 'dish_update' dish.pk %}"
+                           class="btn btn-warning">
+                            Edit Dish
+                        </a>
+
+                        <a href="{% url 'dish_delete' dish.pk %}"
+                           class="btn btn-danger">
+                            Delete Dish
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+{% endblock %}
