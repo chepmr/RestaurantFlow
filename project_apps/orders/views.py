@@ -20,10 +20,7 @@ class OrderDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-
-        context['total_price'] = sum(
-            dish.price for dish in self.object.dishes.all()
-        )
+        context['total_price'] = sum(dish.price for dish in self.object.dishes.all())
 
         return context
 

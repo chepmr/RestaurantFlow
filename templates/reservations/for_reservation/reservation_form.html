@@ -6,6 +6,61 @@
 {% endblock %}
 
 {% block content %}
+<style>
+    .reservation-time-wheel {
+        height: 176px;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+        scroll-snap-type: y mandatory;
+        scrollbar-width: none;
+        border: 1px solid #dee2e6;
+        border-radius: 12px;
+        background: #f8f9fa;
+        padding: 66px 0;
+    }
+
+    .reservation-time-wheel::-webkit-scrollbar {
+        display: none;
+    }
+
+    .time-wheel-wrapper {
+        position: relative;
+    }
+
+    .time-wheel-highlight {
+        position: absolute;
+        top: 50%;
+        left: 4px;
+        right: 4px;
+        height: 44px;
+        transform: translateY(-50%);
+        border: 2px solid #ffc107;
+        border-radius: 8px;
+        pointer-events: none;
+    }
+
+    .time-wheel-option {
+        height: 44px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 1.2rem;
+        color: #6c757d;
+        cursor: pointer;
+        scroll-snap-align: center;
+        user-select: none;
+    }
+
+    .time-wheel-option.selected {
+        color: #212529;
+        font-weight: 700;
+    }
+
+    .reservation-time-controls[hidden] {
+        display: none !important;
+    }
+</style>
+
 <div class="row justify-content-center">
     <div class="col-lg-8">
 
@@ -62,6 +117,59 @@
                                         You can select multiple tables if needed.
                                     </p>
                                 </div>
+
+                            {% elif field.name == 'time' %}
+                                <div class="reservation-time-picker"
+                                     data-time-picker
+                                     data-input-id="{{ field.id_for_label }}">
+
+                                    <div class="row g-3 mb-3 reservation-time-controls"
+                                         data-time-controls hidden>
+
+                                        <div class="col-6">
+                                            <div class="text-center fw-semibold mb-2">
+                                                Hour
+                                            </div>
+
+                                            <div class="time-wheel-wrapper">
+                                                <div class="reservation-time-wheel"
+                                                     data-wheel="hours"
+                                                     role="listbox"
+                                                     tabindex="0"
+                                                     aria-label="Select hour">
+                                                </div>
+
+                                                <div class="time-wheel-highlight"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-6">
+                                            <div class="text-center fw-semibold mb-2">
+                                                Minute
+                                            </div>
+
+                                            <div class="time-wheel-wrapper">
+                                                <div class="reservation-time-wheel"
+                                                     data-wheel="minutes"
+                                                     role="listbox"
+                                                     tabindex="0"
+                                                     aria-label="Select minute">
+                                                </div>
+
+                                                <div class="time-wheel-highlight"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="mb-2">
+                                        {{ field }}
+                                    </div>
+
+                                    <div class="form-text">
+                                        Scroll to select hours and minutes, or enter the time manually.
+                                    </div>
+                                </div>
+
                             {% else %}
                                 {{ field }}
                             {% endif %}
@@ -96,11 +204,13 @@
                     <hr class="my-4">
 
                     <div class="d-flex justify-content-between align-items-center gap-3">
-                        <a href="{% url 'reservation_list' %}" class="btn btn-outline-secondary">
+                        <a href="{% url 'reservation_list' %}"
+                           class="btn btn-outline-secondary">
                             Cancel
                         </a>
 
-                        <button type="submit" class="btn btn-warning fw-semibold px-4">
+                        <button type="submit"
+                                class="btn btn-warning fw-semibold px-4">
                             {% if object %}
                                 Save Changes
                             {% else %}
@@ -119,4 +229,158 @@
 
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const picker = document.querySelector('[data-time-picker]');
+
+    if (!picker) {
+        return;
+    }
+
+    const timeInput = document.getElementById(picker.dataset.inputId);
+    const controls = picker.querySelector('[data-time-controls]');
+    const hourWheel = picker.querySelector('[data-wheel="hours"]');
+    const minuteWheel = picker.querySelector('[data-wheel="minutes"]');
+    const itemHeight = 44;
+
+    if (!timeInput || timeInput.type !== 'time') {
+        return;
+    }
+
+    let syncing = false;
+    let syncTimer = null;
+
+    function createOptions(wheel, count) {
+        const placeholder = document.createElement('div');
+        placeholder.className = 'time-wheel-option';
+        placeholder.textContent = '--';
+        placeholder.dataset.index = '0';
+        placeholder.setAttribute('role', 'option');
+        wheel.appendChild(placeholder);
+
+        for (let number = 0; number < count; number++) {
+            const option = document.createElement('div');
+
+            option.className = 'time-wheel-option';
+            option.textContent = String(number).padStart(2, '0');
+            option.dataset.index = String(number + 1);
+            option.setAttribute('role', 'option');
+
+            wheel.appendChild(option);
+        }
+
+        wheel.dataset.selectedIndex = '0';
+    }
+
+    function highlightOption(wheel, index) {
+        wheel.dataset.selectedIndex = String(index);
+
+        wheel.querySelectorAll('.time-wheel-option').forEach(function (option) {
+            const selected = Number(option.dataset.index) === index;
+
+            option.classList.toggle('selected', selected);
+            option.setAttribute('aria-selected', String(selected));
+        });
+    }
+
+    function selectOption(wheel, index, updateInput) {
+        const maxIndex = wheel.children.length - 1;
+        const selectedIndex = Math.max(0, Math.min(index, maxIndex));
+
+        highlightOption(wheel, selectedIndex);
+        wheel.scrollTop = selectedIndex * itemHeight;
+
+        if (!updateInput) {
+            return;
+        }
+
+        const hourIndex = Number(hourWheel.dataset.selectedIndex);
+        const minuteIndex = Number(minuteWheel.dataset.selectedIndex);
+
+        if (hourIndex === 0 || minuteIndex === 0) {
+            timeInput.value = '';
+            return;
+        }
+
+        const hours = String(hourIndex - 1).padStart(2, '0');
+        const minutes = String(minuteIndex - 1).padStart(2, '0');
+
+        timeInput.value = hours + ':' + minutes;
+    }
+
+    function syncFromInput() {
+        const match = timeInput.value.match(/^(\d{2}):(\d{2})/);
+
+        syncing = true;
+        clearTimeout(syncTimer);
+
+        if (match) {
+            selectOption(hourWheel, Number(match[1]) + 1, false);
+            selectOption(minuteWheel, Number(match[2]) + 1, false);
+        } else {
+            selectOption(hourWheel, 0, false);
+            selectOption(minuteWheel, 0, false);
+        }
+
+        syncTimer = setTimeout(function () {
+            syncing = false;
+        }, 150);
+    }
+
+    function configureWheel(wheel) {
+        let scrollTimer = null;
+
+        wheel.addEventListener('scroll', function () {
+            if (syncing) {
+                return;
+            }
+
+            clearTimeout(scrollTimer);
+
+            scrollTimer = setTimeout(function () {
+                const index = Math.round(wheel.scrollTop / itemHeight);
+
+                selectOption(wheel, index, true);
+            }, 100);
+        }, { passive: true });
+
+        wheel.addEventListener('click', function (event) {
+            const option = event.target.closest('.time-wheel-option');
+
+            if (!option) {
+                return;
+            }
+
+            selectOption(wheel, Number(option.dataset.index), true);
+        });
+
+        wheel.addEventListener('keydown', function (event) {
+            if (event.key !== 'ArrowUp' && event.key !== 'ArrowDown') {
+                return;
+            }
+
+            event.preventDefault();
+
+            const currentIndex = Number(wheel.dataset.selectedIndex);
+            const difference = event.key === 'ArrowUp' ? -1 : 1;
+
+            selectOption(wheel, currentIndex + difference, true);
+        });
+    }
+
+    createOptions(hourWheel, 24);
+    createOptions(minuteWheel, 60);
+
+    configureWheel(hourWheel);
+    configureWheel(minuteWheel);
+
+    controls.hidden = false;
+
+    syncFromInput();
+
+    timeInput.addEventListener('input', syncFromInput);
+    timeInput.addEventListener('change', syncFromInput);
+});
+</script>
 {% endblock %}

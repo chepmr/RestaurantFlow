@@ -3,6 +3,7 @@ from django import forms
 from project_apps.orders.models import Order
 from project_apps.menu.models import Dish
 from project_apps.reservations.models import Table
+from django.db.models import Q
 
 
 class OrderForm(forms.ModelForm):
@@ -49,17 +50,9 @@ class OrderForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
-        self.fields['table'].queryset = Table.objects.filter(
-            in_service=True
-        ).order_by('number')
-
-        self.fields['dishes'].queryset = Dish.objects.filter(
-            is_available=True
-        ).order_by('category', 'name')
-
-        self.fields['dishes'].label_from_instance = (
-            lambda dish: f'{dish.name} - {dish.price:.2f} €'
-        )
+        self.fields['table'].queryset = Table.objects.filter(in_service=True ).order_by('number')
+        self.fields['dishes'].queryset = Dish.objects.filter(is_available=True).order_by('category', 'name')
+        self.fields['dishes'].label_from_instance = ( lambda dish: f'{dish.name} - {dish.price:.2f} €')
 
 
 class OrderUpdateForm(OrderForm):
@@ -94,8 +87,8 @@ class OrderUpdateForm(OrderForm):
         super().__init__(*args, **kwargs)
 
         if self.instance.pk:
-            self.fields['table'].queryset = Table.objects.filter(
-                pk=self.instance.table_id
-            )
+            self.fields['table'].queryset = Table.objects.filter(pk=self.instance.table_id)
+            selected_dishes = self.instance.dishes.values_list('pk', flat=True)
+            self.fields['dishes'].queryset = Dish.objects.filter(Q(is_available=True) | Q(pk__in=selected_dishes)).distinct().order_by('category', 'name')
 
         self.fields['table'].disabled = True

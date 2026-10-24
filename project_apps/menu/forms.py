@@ -28,7 +28,7 @@ class DishForm(forms.ModelForm):
             'price': forms.NumberInput(attrs={
                 'placeholder': 'Enter price',
                 'min': '0.5',
-                'step': '1',
+                'step': '0.01',
             }),
             'is_available': forms.CheckboxInput(),
         }

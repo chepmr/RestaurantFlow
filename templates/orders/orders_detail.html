@@ -1,6 +1,7 @@
 
 {% extends 'base.html' %}
-{% load order_extras %}
+
+{% block title %}Order #{{ order.pk }} | RestaurantFlow{% endblock %}
 
 {% block content %}
 <div class="container py-5">
@@ -67,7 +68,7 @@
                         bg-light border rounded p-3 mb-4">
                 <h5 class="mb-0">Total Price:</h5>
                 <h4 class="mb-0 text-success">
-                    {{ order|order_total|floatformat:2 }} €
+                    {{ total_price|floatformat:2 }} €
                 </h4>
             </div>
 
