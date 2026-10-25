@@ -288,10 +288,44 @@ The application also does not include online payments, customer authentication, 
 
 These features are outside the scope of the current version.
 
+
+## Final Testing and Verification
+
+RestaurantFlow has been manually tested to verify its core functionality and compliance with the Django Basics exam requirements.
+
+### Functional Testing
+
+- Creating, viewing, updating, and deleting tables, reservations, dishes, and orders.
+- Confirming deletions before removing records.
+- Validating form inputs and displaying meaningful error messages.
+- Checking table capacity and overlapping reservations.
+- Verifying relationships between tables, reservations, orders, and dishes.
+- Testing navigation between pages and the custom 404 error page.
+- Confirming that orders can be created independently of reservations.
+
+### Database and Setup
+
+The application uses SQLite and does not require prepopulated data, fixtures, or Django Admin to create records.
+
+Database migrations can be applied using:
+
+```bash
+python manage.py migrate
+```
+
+The development server can be started using:
+
+```bash
+python manage.py runserver
+```
+
+All main records can be created and managed directly through the application's web interface.
+
+[GitHub Repository](https://github.com/chepmr/RestaurantFlow
+
+
 ## Author
 
 **Atanas Naydenov**
 
 SoftUni Django Basics Regular Exam — October 2026
-
-[GitHub Repository](https://github.com/chepmr/RestaurantFlow)
